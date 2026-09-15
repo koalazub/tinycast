@@ -22,6 +22,7 @@ struct InstalledAITests {
         }
         defer { fixture.tearDown() }
         openCodeCatalogCarriesModelVariants()
+        versionReportsTheCLIsLine()
         await openCodeRunsWithoutToolsAndDeletesItsSession(fixture)
         await claudeRunsWithoutToolsOrHistory(fixture)
         claudeMCPConfigNamesNoServers(fixture)
@@ -51,6 +52,18 @@ struct InstalledAITests {
             models.first?.efforts.map(\.id) == ["low", "high"],
             "OpenCode discovery keeps each model's supported reasoning variants")
         expect(models.last?.efforts.isEmpty == true, "models without variants show no effort picker")
+    }
+
+    private static func versionReportsTheCLIsLine() {
+        expect(
+            InstalledAIProbe.version(in: "opencode2 v0.0.0-beta-19271\n")
+                == "opencode2 v0.0.0-beta-19271",
+            "a prerelease version is reported, not truncated to its release core")
+        expect(
+            InstalledAIProbe.version(in: "\n  1.2.3 (Claude Code)  \nsecond line")
+                == "1.2.3 (Claude Code)",
+            "the first non-empty line is kept and trimmed")
+        expect(InstalledAIProbe.version(in: " \n\n") == nil, "blank output reports no version")
     }
 
     private static func openCodeRunsWithoutToolsAndDeletesItsSession(_ fixture: Fixture) async {

@@ -228,8 +228,11 @@ enum InstalledAIProbe {
             })
     }
 
+    /// The CLI's own line, verbatim: extraction can only lose or misread what it reports.
     nonisolated static func version(in output: String) -> String? {
-        output.firstMatch(of: #/\d+\.\d+(?:\.\d+)?/#).map { String($0.output) }
+        output.split(whereSeparator: { $0.isNewline })
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .first { !$0.isEmpty }
     }
 
     nonisolated static func loggedIn(toClaude output: String) -> Bool {
